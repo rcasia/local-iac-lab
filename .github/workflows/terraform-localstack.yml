@@ -20,30 +20,17 @@ jobs:
       - name: Spin up LocalStack
         run: make up
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.5
 
-      - name: Build Lambda
-        run: ./infra/lambda/build.sh
-
       - name: Terraform Init
-        working-directory: infra
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: infra
-        run: terraform plan -input=false
+        run: make tf-init
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        working-directory: infra
-        run: terraform apply -auto-approve -input=false
+        run: make tf-apply
 
       - name: Install AWS CLI
         run: |
