@@ -1,7 +1,7 @@
 .PHONY: up down build tf-init tf-plan tf-apply tf-destroy test
 
 up:
-	docker compose up -d
+	docker compose up -d --wait
 
 down:
 	docker compose down -v
@@ -22,4 +22,4 @@ tf-destroy:
 	cd infra && terraform destroy -auto-approve
 
 test:
-	./tests/smoke.sh
+	USE_LOCAL=true ./tests/smoke.sh

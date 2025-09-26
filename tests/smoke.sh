@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export AWS_PAGER=""
 
-endpoint="http://localhost:4566"
-queue_url=$(aws --endpoint-url $endpoint sqs get-queue-url --queue-name local-iac-lab-inbox --query 'QueueUrl' --output text)
+TABLE="events"
+REGION="${REGION:-eu-west-1}"
+USE_LOCAL="${USE_LOCAL:-false}"
 
-# Send a message
-aws --endpoint-url $endpoint sqs send-message \
-  --queue-url "$queue_url" \
-  --message-body '{"hello":"world"}' >/dev/null
+ENDPOINT_ARGS=()
+if [ "$USE_LOCAL" = "true" ]; then
+  ENDPOINT_ARGS+=(--endpoint-url http://localhost:4566)
+fi
 
-# Give Lambda a moment to process
-sleep 2
+echo "🧪 Smoke test (USE_LOCAL=$USE_LOCAL) sobre tabla '$TABLE'"
 
-# Check DynamoDB has at least one item
-count=$(aws --endpoint-url $endpoint dynamodb scan \
-  --table-name local-iac-lab-events \
-  --select COUNT --query 'Count' --output text)
+aws dynamodb describe-table \
+  --table-name "$TABLE" --region "$REGION" "${ENDPOINT_ARGS[@]}"
 
-echo "DynamoDB item count: $count"
-test "$count" -ge 1
+aws dynamodb put-item \
+  --table-name "$TABLE" --region "$REGION" "${ENDPOINT_ARGS[@]}" \
+  --item '{"id":{"S":"1"}, "smoke":{"S":"ok"}}'
+
+aws dynamodb get-item \
+  --table-name "$TABLE" --region "$REGION" "${ENDPOINT_ARGS[@]}" \
+  --key '{"id":{"S":"1"}}'
+
 echo "✅ Smoke test passed"

@@ -7,9 +7,11 @@ services:
       - "4510-4559:4510-4559"
     environment:
       - SERVICES=s3,sqs,lambda,dynamodb,iam,logs,cloudwatch
+      - AWS_DEFAULT_REGION=us-east-1
       - DEBUG=1
       - LAMBDA_EXECUTOR=docker
-      - AWS_DEFAULT_REGION=us-east-1
+      - LAMBDA_REMOTE_DOCKER=false # execute lambdas inside localstack container
+      - LOCALSTACK_HOSTNAME=localstack
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
     volumes:
