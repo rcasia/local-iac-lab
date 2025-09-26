@@ -1,0 +1,66 @@
+name: Terraform + LocalStack
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  iac:
+    runs-on: ubuntu-latest
+
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: s3,sqs,lambda,dynamodb,iam,logs,cloudwatch
+          AWS_DEFAULT_REGION: us-east-1
+          LAMBDA_EXECUTOR: docker
+        options: >-
+          --health-cmd="curl -s http://localhost:4566/_localstack/health | grep '\"initialized\": true'"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Build Lambda
+        run: ./infra/lambda/build.sh
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: infra
+        run: terraform apply -auto-approve -input=false
+
+      - name: Install AWS CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+
+      - name: Smoke test
+        run: ./tests/smoke.sh

@@ -1,0 +1,51 @@
+# ────────────────
+# Terraform
+# ────────────────
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*.override.tf
+*.override.tf.json
+.terraform/
+.terraform.lock.hcl  # ⚠️ opcional: inclúyelo si quieres lock reproducible
+
+# ────────────────
+# LocalStack / Docker
+# ────────────────
+.localstack/
+docker-compose.override.yml
+
+# ────────────────
+# Python / Lambda
+# ────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.Python
+.venv/
+venv/
+ENV/
+env/
+# Lambda build artifacts
+infra/lambda/function.zip
+infra/lambda/package/
+
+# ────────────────
+# Logs & temp
+# ────────────────
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# ────────────────
+# Tests
+# ────────────────
+tests/*.out
+tests/*.tmp
