@@ -9,21 +9,6 @@ jobs:
   iac:
     runs-on: ubuntu-latest
 
-    services:
-      localstack:
-        image: localstack/localstack:latest
-        ports:
-          - 4566:4566
-        env:
-          SERVICES: s3,sqs,lambda,dynamodb,iam,logs,cloudwatch
-          AWS_DEFAULT_REGION: us-east-1
-          LAMBDA_EXECUTOR: docker
-        options: >-
-          --health-cmd="curl -s http://localhost:4566/_localstack/health | grep '\"initialized\": true'"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=30
-
     env:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
@@ -31,6 +16,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Spin up LocalStack
+        run: make up
 
       - uses: actions/setup-python@v5
         with:
