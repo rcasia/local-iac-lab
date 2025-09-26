@@ -38,4 +38,4 @@ jobs:
           pip install awscli
 
       - name: Smoke test
-        run: ./tests/smoke.sh
+        run: make test
